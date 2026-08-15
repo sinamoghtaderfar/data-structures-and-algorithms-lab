@@ -1,4 +1,5 @@
 [English](./README.md) | [فارسی](./README.fa.md)
+
 # فصل ۱ — مقدمه‌ای بر الگوریتم‌ها
 
 این فصل تعدادی از مهم‌ترین پایه‌های لازم برای مطالعه‌ی الگوریتم‌ها را معرفی می‌کند.
@@ -760,7 +761,6 @@ Benchmark
 
 ---
 
-```markdown
 ## چیزهایی که در این فصل یاد گرفتم
 
 بعد از مطالعه‌ی این فصل:
@@ -788,6 +788,7 @@ Benchmark
 - [Visualization مربوط به Binary Search](../../../visualizations/searching/binary-search/visualize_binary_search.py)
 
 ---
+
 ## نتیجه‌ی اصلی فصل
 
 مهم‌ترین درس این فصل فقط نحوه‌ی نوشتن Binary Search نیست.
