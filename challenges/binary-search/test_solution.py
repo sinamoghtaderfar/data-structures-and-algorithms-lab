@@ -1,4 +1,4 @@
-from binary_search_log_server import find_first_log_at_or_after
+from solution import find_first_log_at_or_after
 
 
 logs = [
