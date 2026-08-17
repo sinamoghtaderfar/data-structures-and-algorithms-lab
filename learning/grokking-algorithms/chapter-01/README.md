@@ -1,43 +1,54 @@
-[English](./README.md) | [فارسی](./README.fa.md)
+[فارسی](./README.fa.md)
 
 # Chapter 01 — Introduction to Algorithms
 
-This chapter introduces some of the most important foundations for studying algorithms.
+These are my notes from Chapter 1 of *Grokking Algorithms*.
 
-The main topics are:
+This chapter starts with Binary Search, but the bigger lesson is not really about one search algorithm. It introduces a way of thinking about algorithms:
 
-* Binary Search
-* Running Time
-* Logarithms
-* Big O Notation
-* Growth Rates
-* Worst-Case Analysis
-* Common Big O Running Times
-* The Traveling Salesperson Problem
+> How does the amount of work grow as the input becomes larger?
 
-The goal is not only to learn how an algorithm works, but also to understand **why one algorithm can scale much better than another**.
+That question leads to some of the foundations I will use throughout the rest of this repository:
+
+- Binary Search
+- Simple Search
+- logarithms
+- running time
+- Big O notation
+- growth rates
+- worst-case analysis
+- common complexity classes
+- factorial growth and the Traveling Salesperson Problem
+
+The goal of this chapter is not to memorize complexity notation.
+
+It is to start recognizing why two algorithms that solve the same problem can behave very differently as the amount of data grows.
 
 ---
 
 ## 1. Binary Search
 
-Binary Search is an efficient search algorithm for finding an item in a **sorted collection**.
+Binary Search is an efficient algorithm for finding a target in a **sorted collection**.
 
-Instead of checking every element one by one, Binary Search checks the middle element and eliminates half of the remaining search space after every comparison.
-
-For example, suppose we have:
+Suppose I have:
 
 ```text
 [5, 10, 15, 20, 25, 30, 35]
 ```
 
-and we want to find:
+and I want to find:
 
 ```text
 25
 ```
 
-Binary Search first checks the middle element:
+Instead of checking:
+
+```text
+5 → 10 → 15 → 20 → 25
+```
+
+Binary Search starts from the middle:
 
 ```text
 [5, 10, 15, 20, 25, 30, 35]
@@ -48,12 +59,12 @@ Binary Search first checks the middle element:
 Since:
 
 ```text
-20 < 25
+25 > 20
 ```
 
-the left half can be ignored.
+everything on the left can be ignored.
 
-The remaining search space becomes:
+The remaining search space is:
 
 ```text
 [25, 30, 35]
@@ -68,63 +79,75 @@ The next middle value is:
 Since:
 
 ```text
-30 > 25
+25 < 30
 ```
 
-the right side is eliminated.
+the right side can be discarded.
 
-Only:
+That leaves:
 
 ```text
 25
 ```
 
-remains.
+and the target is found.
 
-The target has been found.
+The important idea is:
+
+> Binary Search does not become fast by making comparisons faster.  
+> It becomes fast by eliminating a large part of the remaining search space after every comparison.
 
 ---
 
-## 2. Binary Search Requires Sorted Data
+## 2. Why the Data Must Be Sorted
 
-Binary Search only works correctly when the data is sorted.
+Binary Search depends on ordering.
 
-For example:
+This works:
 
 ```text
 [2, 5, 8, 12, 17, 21, 30]
 ```
 
-is suitable for Binary Search.
-
-However:
+This does not:
 
 ```text
 [21, 5, 30, 2, 17, 8, 12]
 ```
 
-is not.
+Why?
 
-The reason is simple: Binary Search decides which half of the collection can be safely discarded by comparing the target with the middle value.
+Suppose the middle value is smaller than the target.
 
-Without ordering, that decision cannot be made reliably.
+With sorted data, I know that everything before the middle is also too small.
+
+That lets me safely discard half of the data.
+
+Without sorting, that conclusion is no longer valid.
+
+So the requirement is not just a technical detail:
+
+> **The ordering of the data is what makes elimination possible.**
 
 ---
 
 ## 3. Tracking the Search Range
 
-The Binary Search implementation keeps track of the current search range using two variables:
+The iterative Binary Search implementation keeps track of the current search space using:
 
 ```python
 low = 0
 high = len(arr) - 1
 ```
 
-`low` represents the first index that may still contain the target.
+At the beginning:
 
-`high` represents the last index that may still contain the target.
+```text
+low                              high
+ ↓                                 ↓
 
-At the beginning, the entire array is included in the search range.
+[5, 10, 15, 20, 25, 30, 35]
+```
 
 The middle index is calculated with:
 
@@ -132,50 +155,56 @@ The middle index is calculated with:
 mid = (low + high) // 2
 ```
 
-Python's `//` operator performs integer division, so the result can safely be used as an array index.
-
-The middle value is then retrieved:
+and the value is:
 
 ```python
 guess = arr[mid]
 ```
 
-Three cases are possible.
+Now there are three possibilities.
 
-### Target found
+### The target was found
 
 ```python
 if guess == target:
     return mid
 ```
 
-### Guess is too high
-
-The target must be on the left side:
+### The guess is too high
 
 ```python
 high = mid - 1
 ```
 
-### Guess is too low
+The right side is discarded.
 
-The target must be on the right side:
+### The guess is too low
 
 ```python
 low = mid + 1
 ```
 
-This continues while the search range is valid:
+The left side is discarded.
+
+The search continues while:
 
 ```python
-while low <= high:
+low <= high
 ```
 
-If the range becomes empty, the target does not exist in the array.
+If eventually:
+
+```text
+low > high
+```
+
+the search range is empty and the target does not exist.
 
 ---
 
 ## 4. Python Implementation
+
+The basic implementation looks like this:
 
 ```python
 def binary_search(arr, target):
@@ -189,9 +218,8 @@ def binary_search(arr, target):
         if guess == target:
             return mid
 
-        elif guess > target:
+        if guess > target:
             high = mid - 1
-
         else:
             low = mid + 1
 
@@ -203,7 +231,9 @@ Example:
 ```python
 numbers = [5, 10, 15, 20, 25, 30, 35]
 
-print(binary_search(numbers, 25))
+result = binary_search(numbers, 25)
+
+print(result)
 ```
 
 Output:
@@ -212,7 +242,7 @@ Output:
 4
 ```
 
-The result is `4` because Python indexes begin at `0`.
+because Python indexes begin at zero:
 
 ```text
 Index:  0   1   2   3   4   5   6
@@ -220,58 +250,66 @@ Value:  5  10  15  20  25  30  35
                        ↑
 ```
 
+The maintained implementation, tests, and visualization live outside these learning notes:
+
+[Binary Search implementation and documentation](../../../algorithms/searching/binary-search/README.md)
+
 ---
 
 ## 5. Simple Search vs Binary Search
 
-A simple search checks elements sequentially.
-
-For example:
+Simple Search checks values sequentially.
 
 ```text
 1 → 2 → 3 → 4 → 5 → ...
 ```
 
-If there are `n` elements, the worst case may require checking all `n` elements.
+For `n` elements, it may need to inspect all `n` elements.
+
+So its worst-case running time grows as:
+
+```text
+O(n)
+```
 
 Binary Search behaves differently.
 
-It removes approximately half of the remaining possibilities after every comparison.
-
-For example:
+Consider 128 possible values:
 
 ```text
 128
-↓
+ ↓
 64
-↓
+ ↓
 32
-↓
+ ↓
 16
-↓
+ ↓
 8
-↓
+ ↓
 4
-↓
+ ↓
 2
-↓
+ ↓
 1
 ```
 
-Only seven halvings are required.
+Only seven halvings are needed.
 
-Therefore:
+So:
 
 ```text
-Simple Search  → up to n checks
-Binary Search  → up to log₂(n) checks
+Simple Search  → O(n)
+Binary Search  → O(log n)
 ```
+
+This difference becomes much more important as `n` grows.
 
 ---
 
-## 6. Logarithms
+## 6. Understanding Logarithms
 
-A logarithm is the inverse of exponentiation.
+A logarithm reverses exponentiation.
 
 For example:
 
@@ -285,23 +323,21 @@ therefore:
 log₂(8) = 3
 ```
 
-Another example:
+Similarly:
 
 ```text
 2¹⁰ = 1024
 ```
 
-therefore:
+so:
 
 ```text
 log₂(1024) = 10
 ```
 
-In the context of this chapter, `log n` refers to `log₂(n)`.
+For Binary Search, a useful way to think about `log₂(n)` is:
 
-A useful way to understand it is:
-
-> How many times can the input be divided by two before only one possibility remains?
+> How many times can I divide the remaining possibilities by two before only one remains?
 
 For example:
 
@@ -317,74 +353,214 @@ For example:
 1
 ```
 
-There are four divisions, so:
+That takes four halvings:
 
 ```text
 log₂(16) = 4
 ```
 
-This explains why Binary Search has logarithmic running time.
+This is why logarithms naturally appear when analyzing Binary Search.
 
 ---
 
-## 7. Running Time
+## 7. Running Time Is About Growth
 
-When analyzing an algorithm, the important question is not only:
-
-> How many seconds does this program take right now?
+When comparing algorithms, measuring one execution in milliseconds does not tell the whole story.
 
 A more useful question is:
 
-> How does the amount of work grow when the input becomes larger?
+> What happens when the input becomes much larger?
 
-Consider a collection containing 100 elements.
+Consider:
 
-Simple Search may require:
+| Input size | Simple Search | Binary Search |
+|---:|---:|---:|
+| 100 | up to 100 checks | ~7 checks |
+| 1,000 | up to 1,000 | ~10 |
+| 1,000,000 | up to 1,000,000 | ~20 |
+| 1,000,000,000 | up to 1,000,000,000 | ~30 |
 
-```text
-100 checks
-```
+For small inputs, performance differences may not look dramatic.
 
-Binary Search requires roughly:
+For large inputs, the growth rate becomes much more important.
 
-```text
-7 checks
-```
-
-Now consider approximately one billion elements.
-
-Simple Search may require:
-
-```text
-1,000,000,000 checks
-```
-
-Binary Search requires roughly:
-
-```text
-30 checks
-```
-
-The difference becomes dramatically larger as the input grows.
+That is the perspective Big O helps describe.
 
 ---
 
 ## 8. Big O Notation
 
-Big O notation describes how an algorithm's running time grows as the size of its input increases.
+Big O describes how the amount of work performed by an algorithm grows as the input size increases.
 
-It does not tell us the exact number of seconds an algorithm will take.
+It does **not** tell me:
 
-Instead, it describes the **growth of the amount of work** performed by the algorithm.
+```text
+This algorithm takes exactly 0.25 seconds.
+```
+
+Instead, it tells me something like:
+
+```text
+If the input becomes much larger,
+how quickly does the required work grow?
+```
 
 For Simple Search:
 
 ```text
-n elements
-→ up to n checks
+n items
+→ potentially n checks
+→ O(n)
 ```
 
-Therefore:
+For Binary Search:
+
+```text
+n items
+→ roughly log₂(n) checks
+→ O(log n)
+```
+
+So:
+
+```text
+Simple Search
+O(n)
+
+Binary Search
+O(log n)
+```
+
+Big O is therefore much more useful for reasoning about scalability than a single timing measurement.
+
+---
+
+## 9. Growth Rates
+
+Some common complexity classes are:
+
+```text
+O(1)
+O(log n)
+O(n)
+O(n log n)
+O(n²)
+O(n!)
+```
+
+They do not grow at the same speed.
+
+### `O(1)` — Constant
+
+The amount of work does not grow with `n` in the usual model.
+
+Example:
+
+```python
+value = arr[5]
+```
+
+---
+
+### `O(log n)` — Logarithmic
+
+The problem becomes dramatically smaller after each step.
+
+Example:
+
+```text
+Binary Search
+```
+
+---
+
+### `O(n)` — Linear
+
+The amount of work grows roughly in proportion to the input size.
+
+Example:
+
+```text
+Simple Search
+```
+
+---
+
+### `O(n log n)`
+
+This complexity appears in efficient comparison-based sorting algorithms such as Merge Sort and average-case Quick Sort.
+
+It grows faster than linear time but much more slowly than quadratic time for large inputs.
+
+---
+
+### `O(n²)` — Quadratic
+
+The amount of work can grow roughly with the square of the input.
+
+For example:
+
+```text
+n = 10
+n² = 100
+
+n = 1,000
+n² = 1,000,000
+```
+
+Algorithms involving nested work over the same input often appear in this area.
+
+Selection Sort, introduced later in the book, has `O(n²)` time complexity.
+
+---
+
+### `O(n!)` — Factorial
+
+Factorial growth becomes enormous very quickly.
+
+```text
+5!  = 120
+6!  = 720
+7!  = 5,040
+8!  = 40,320
+10! = 3,628,800
+```
+
+This is a completely different scale of growth.
+
+---
+
+## 10. Worst-Case Analysis
+
+An algorithm can behave differently depending on the input.
+
+Suppose Simple Search looks for a value in:
+
+```text
+[5, 10, 15, 20, 25]
+```
+
+If the target is:
+
+```text
+5
+```
+
+it is found immediately.
+
+That is a best-case situation.
+
+But if the target is:
+
+```text
+25
+```
+
+or does not exist, many or all elements may need to be checked.
+
+Big O in this chapter mainly focuses on how the algorithm behaves as the input grows, commonly using the worst-case upper-bound perspective.
+
+For Simple Search:
 
 ```text
 O(n)
@@ -393,143 +569,79 @@ O(n)
 For Binary Search:
 
 ```text
-n elements
-→ roughly log₂(n) checks
+O(log n)
 ```
 
-Therefore:
+Even Binary Search has a best case of:
+
+```text
+O(1)
+```
+
+when the target happens to be the first middle element.
+
+But its worst-case growth remains:
 
 ```text
 O(log n)
 ```
 
-This gives us:
-
-```text
-Simple Search  → O(n)
-Binary Search  → O(log n)
-```
-
 ---
 
-## 9. Growth Matters More Than Small Benchmarks
+## 11. Why Constant Factors Are Usually Ignored
 
-Two algorithms can appear relatively close in performance when tested with a small input.
-
-That does not mean the difference will remain constant.
-
-For example:
+Suppose one algorithm performs roughly:
 
 ```text
-Input Size          Simple Search       Binary Search
-
-100                 100                 ~7
-1,000               1,000               ~10
-1,000,000           1,000,000           ~20
-1,000,000,000       1,000,000,000       ~30
+n
 ```
 
-Binary Search grows very slowly compared with Simple Search.
+operations and another performs:
 
-This is why understanding the **growth rate** of an algorithm is more important than comparing only one small timing experiment.
+```text
+2n
+```
 
----
-
-## 10. Worst-Case Running Time
-
-Big O is used in this chapter to describe the worst-case growth of an algorithm.
-
-Suppose Simple Search is looking for a name in a phone book.
-
-If the name happens to be the first entry, it may be found immediately.
-
-That is a best-case situation.
-
-However, the name could also be the final entry.
-
-In that situation, every item must be checked.
-
-Therefore, the worst-case running time remains:
+Both are still classified as:
 
 ```text
 O(n)
 ```
 
-The chapter focuses mainly on worst-case analysis.
+Big O focuses primarily on how the work grows, not on constant multipliers.
 
-Average-case analysis is introduced later in the book.
+This does **not** mean constants never matter in real software.
 
----
+They absolutely can.
 
-## 11. Common Big O Running Times
-
-Some common growth rates, ordered from better scaling to worse scaling, are:
+But when studying algorithmic growth, the difference between:
 
 ```text
-O(log n)
 O(n)
-O(n log n)
+```
+
+and:
+
+```text
 O(n²)
-O(n!)
 ```
 
-### O(log n) — Logarithmic Time
-
-Example:
-
-```text
-Binary Search
-```
-
-The search space is repeatedly divided.
+eventually matters much more than a fixed multiplier.
 
 ---
 
-### O(n) — Linear Time
+## 12. The Traveling Salesperson Example
 
-Example:
+The Traveling Salesperson Problem asks for a shortest route that visits a collection of cities and returns to the starting point.
 
-```text
-Simple Search
-```
+One naive brute-force approach is:
 
-The work grows approximately in direct proportion to the input size.
+1. generate possible city orders;
+2. calculate the distance of each route;
+3. compare the routes;
+4. keep the shortest.
 
----
-
-### O(n log n)
-
-This growth rate appears in efficient sorting algorithms.
-
-It grows faster than `O(n)` but much slower than quadratic growth for large inputs.
-
----
-
-### O(n²) — Quadratic Time
-
-This growth rate appears in algorithms such as Selection Sort, which is introduced later in the book.
-
-For example:
-
-```text
-n = 10
-n² = 100
-```
-
-but:
-
-```text
-n = 1000
-n² = 1,000,000
-```
-
-The amount of work increases rapidly.
-
----
-
-### O(n!) — Factorial Time
-
-Factorial growth is extremely fast.
+The number of possible orderings grows factorially.
 
 For example:
 
@@ -538,55 +650,19 @@ For example:
 6! = 720
 7! = 5,040
 8! = 40,320
-10! = 3,628,800
 ```
 
-Even relatively small increases in `n` produce enormous increases in work.
-
----
-
-## 12. The Traveling Salesperson Problem
-
-The Traveling Salesperson Problem is an example that demonstrates factorial growth.
-
-Suppose a salesperson must visit several cities while minimizing the total travel distance.
-
-A brute-force solution could:
-
-1. Generate every possible order of the cities.
-2. Calculate the total distance for every route.
-3. Compare all routes.
-4. Select the shortest one.
-
-For five cities:
-
-```text
-5! = 120
-```
-
-possible orders exist.
-
-For six cities:
-
-```text
-6! = 720
-```
-
-For seven:
-
-```text
-7! = 5,040
-```
-
-In general, checking every possible ordering requires factorial growth:
+A brute-force enumeration of permutations therefore has factorial-scale growth:
 
 ```text
 O(n!)
 ```
 
-This becomes impractical extremely quickly.
+The important lesson here is not that every possible algorithm for TSP literally runs in `O(n!)`.
 
-The book later discusses approximate approaches for problems of this kind.
+The lesson is that **brute-force enumeration of every ordering explodes extremely quickly**.
+
+This is my first clear example of how some problems become computationally difficult even when `n` does not look very large.
 
 ---
 
@@ -605,12 +681,14 @@ log₂(128) = 7
 Answer:
 
 ```text
-7 steps
+7
 ```
+
+---
 
 ### Exercise 1.2
 
-The list size doubles to 256.
+Now the list contains 256 names.
 
 ```text
 log₂(256) = 8
@@ -619,18 +697,26 @@ log₂(256) = 8
 Answer:
 
 ```text
-8 steps
+8
 ```
 
-This demonstrates an important property of logarithmic growth:
+So doubling the input from:
 
-> Doubling the input adds only one additional Binary Search step.
+```text
+128 → 256
+```
+
+adds only one additional Binary Search step.
+
+That is a useful intuition for logarithmic growth.
 
 ---
 
 ### Exercise 1.3
 
 Find someone's phone number when their name is known and the phone book is sorted by name.
+
+Binary Search can be used:
 
 ```text
 O(log n)
@@ -640,7 +726,9 @@ O(log n)
 
 ### Exercise 1.4
 
-Find someone's name when only the phone number is known and the phone book is not sorted by phone number.
+Find someone's name when only the phone number is known, while the phone book is not sorted by phone number.
+
+In the basic model, the entries may need to be scanned:
 
 ```text
 O(n)
@@ -650,43 +738,47 @@ O(n)
 
 ### Exercise 1.5
 
-Read the phone number of every person.
+Read every person's phone number.
+
+Every entry must be visited:
 
 ```text
 O(n)
 ```
-
-Every entry must be visited.
 
 ---
 
 ### Exercise 1.6
 
-Read the phone numbers of all people whose names begin with A.
+Read the phone numbers of all people whose names begin with `A`.
 
-The result is still expressed as:
+In the simplified analysis used in the chapter, this is treated as linear work:
 
 ```text
 O(n)
 ```
 
-Constant factors do not change the Big O growth class.
+The broader lesson is that Big O describes the growth class and ignores constant factors.
+
+Later, with different data structures or more precise assumptions about how the data is organized, the analysis of similar queries can become more nuanced.
 
 ---
 
-## 14. Testing the Implementation
+## 14. Testing Binary Search
 
-The implementation in this repository is tested with `pytest`.
+Understanding the idea is not enough.
 
-Important cases include:
+The implementation also needs to behave correctly around its boundaries.
 
-* Target exists
-* First element
-* Last element
-* Target does not exist
-* Empty array
-* Single-element array
-* Single-element array where the target does not exist
+Useful tests include:
+
+- target exists;
+- first element;
+- last element;
+- target does not exist;
+- empty collection;
+- single-element collection;
+- missing target in a single-element collection.
 
 Example:
 
@@ -699,15 +791,19 @@ def test_target_exists():
     assert result == 4
 ```
 
-The goal of testing is to verify that the implementation behaves correctly across both normal inputs and edge cases.
+The actual tests for this repository live here:
+
+[Binary Search tests](../../../algorithms/searching/binary-search/test_binary_search.py)
+
+Testing is useful because an algorithm can look correct on the normal case while still failing at its boundaries.
 
 ---
 
 ## 15. Visualization
 
-Binary Search is also useful to visualize because the search range changes after every comparison.
+Binary Search is particularly useful to visualize because its search space changes after every comparison.
 
-For each step, the visualization tracks:
+The three important positions are:
 
 ```text
 LOW
@@ -715,120 +811,171 @@ MID
 HIGH
 ```
 
-The current search range becomes smaller after every iteration.
-
-Example:
+For example:
 
 ```text
-Step 1
-
 [5, 10, 15, 20, 25, 30, 35]
  ↑          ↑              ↑
 LOW        MID            HIGH
 ```
 
-After determining which half can be discarded, the range becomes smaller.
+After comparing the middle value with the target, either `low` or `high` moves.
 
-Visualizing this process makes the central idea of Binary Search easier to understand:
+The remaining search range becomes smaller.
 
-> Every comparison removes approximately half of the remaining search space.
+That makes the central idea visible:
+
+> Every comparison should remove a part of the search space that can no longer contain the answer.
+
+The visualization for the maintained implementation is documented here:
+
+[Binary Search Visualization](../../../algorithms/searching/binary-search/VISUALIZATION.md)
 
 ---
 
-## 16. Learning Workflow
+## 16. From Exact Search to Boundary Search
 
-The workflow used for this repository is:
+After implementing normal Binary Search, I used the same core idea for a slightly more interesting problem.
+
+Instead of asking:
+
+> Where is this exact value?
+
+the challenge asks:
+
+> Where is the first value that is equal to or greater than the target?
+
+For example, with sorted server logs:
 
 ```text
-Explain
-   ↓
-Implement
-   ↓
-Test
-   ↓
-Visualize
-   ↓
-Benchmark
+10:00:01
+10:02:15
+10:05:40
+10:08:12
+10:08:48
+10:12:33
 ```
 
-### Explain
+and:
 
-Understand the concept and the reasoning behind the algorithm.
+```text
+target = 10:08:15
+```
+
+the answer is:
+
+```text
+10:08:48
+```
+
+This is a **boundary-search / lower-bound** variation of Binary Search.
+
+It helped me understand that Binary Search is not just one fixed function.
+
+The deeper technique is using sorted data to repeatedly eliminate impossible regions.
+
+[View the Binary Search Challenge](../../../challenges/binary-search/README.md)
+
+---
+
+## 17. Learning Workflow
+
+The workflow I am using in this repository is:
+
+```text
+Understand
+    ↓
+Implement
+    ↓
+Test
+    ↓
+Visualize
+    ↓
+Benchmark when useful
+    ↓
+Apply
+```
+
+### Understand
+
+Build the mental model first.
 
 ### Implement
 
-Write the algorithm from scratch.
+Write the algorithm myself instead of only reading it.
 
 ### Test
 
-Verify correctness and edge cases.
+Check normal cases and edge cases.
 
 ### Visualize
 
-Observe how the algorithm changes its search space step by step.
+Use visualization when seeing the state changes makes the concept easier to understand.
 
 ### Benchmark
 
-Measure and compare algorithm behavior as input size increases.
+Measure behavior when performance comparisons actually add something useful.
+
+### Apply
+
+Use the idea in a problem that is slightly different from the textbook example.
+
+The last step matters because being able to reproduce an algorithm is not the same as being able to recognize when to use it.
 
 ---
 
-## What I Learned
+## 18. What I Learned
 
-After completing this chapter, I understand that:
+After Chapter 1, these are the ideas I want to keep:
 
-* Binary Search requires sorted data.
-* Binary Search repeatedly eliminates half of the remaining search space.
-* Binary Search has logarithmic running time: `O(log n)`.
-* Simple Search has linear running time: `O(n)`.
-* Logarithms help explain why Binary Search scales efficiently.
-* Big O describes growth rather than exact execution time in seconds.
-* Algorithms with similar performance on small inputs can behave very differently on large inputs.
-* Worst-case analysis provides an upper-bound view of algorithm growth.
-* `O(log n)` scales much better than `O(n)`.
-* `O(n!)` grows extremely quickly and becomes impractical even for relatively small input sizes.
+- Binary Search requires sorted data.
+- Its power comes from eliminating roughly half of the remaining search space.
+- Binary Search has `O(log n)` worst-case time complexity.
+- Simple Search has `O(n)` worst-case time complexity.
+- Logarithms explain repeated halving.
+- Big O describes growth, not exact execution time.
+- Small benchmark differences can hide huge scalability differences.
+- Best-case and worst-case behavior can be different.
+- Constant factors are usually ignored when describing Big O growth classes.
+- `O(log n)`, `O(n)`, `O(n log n)`, `O(n²)`, and `O(n!)` scale very differently.
+- Brute-force permutation search becomes impractical very quickly.
+- Binary Search is a technique that can be adapted to boundary-search problems, not just exact lookup.
 
 ---
 
 ## Related Project Files
 
-The concepts from this chapter are implemented, tested, and visualized in the following files:
+The concepts from this chapter are implemented, tested, visualized, and applied elsewhere in the repository.
 
-- [Binary Search Implementation](../../../implementations/searching/binary-search/binary_search.py)
-- [Binary Search Tests](../../../implementations/searching/binary-search/test_binary_search.py)
-- [Binary Search Visualization](../../../visualizations/searching/binary-search/visualize_binary_search.py)
+### Binary Search
+
+- [Algorithm Overview](../../../algorithms/searching/binary-search/README.md)
+- [Implementation](../../../algorithms/searching/binary-search/binary_search.py)
+- [Tests](../../../algorithms/searching/binary-search/test_binary_search.py)
+- [Visualization Documentation](../../../algorithms/searching/binary-search/VISUALIZATION.md)
 
 ### Visualization Output
 
-![Binary Search Step 1](../../../visualizations/searching/binary-search/output/step_1.png)
+![Binary Search Step 1](../../../algorithms/searching/binary-search/assets/step_1.png)
 
-![Binary Search Step 2](../../../visualizations/searching/binary-search/output/step_2.png)
+![Binary Search Step 2](../../../algorithms/searching/binary-search/assets/step_2.png)
 
-![Binary Search Step 3](../../../visualizations/searching/binary-search/output/step_3.png)
+![Binary Search Step 3](../../../algorithms/searching/binary-search/assets/step_3.png)
 
----
+### Practical Challenge
 
-## Challenge
-
-After learning and implementing Binary Search, I applied it to a server-log search problem.
-
-The goal is to find the first log whose timestamp is equal to or later than a requested time using `O(log n)` search.
-
-[View the Binary Search Server Log Challenge](../../../challenges/binary-search-log-server/README.md)
+- [Server Log Boundary Search](../../../challenges/binary-search/README.md)
 
 ---
 
 ## Key Takeaway
 
-The most important lesson from this chapter is not simply how to implement Binary Search.
+The most important thing I learned from this chapter is not the exact Python implementation of Binary Search.
 
-It is learning to ask:
+It is this:
 
-> **How does this algorithm behave when the input becomes much larger?**
+> **Algorithm design is about how intelligently I can reduce the amount of work required to solve a problem.**
 
-That question is the foundation of algorithm analysis.
+Binary Search is a simple example, but it introduces an idea that will appear again and again:
 
-```text
-Binary Search → O(log n)
-
-Simple Search → O(n)
+**Do not process information that you can prove you no longer need.**
