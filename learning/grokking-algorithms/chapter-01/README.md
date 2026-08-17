@@ -808,6 +808,16 @@ The concepts from this chapter are implemented, tested, and visualized in the fo
 
 ---
 
+## Challenge
+
+After learning and implementing Binary Search, I applied it to a server-log search problem.
+
+The goal is to find the first log whose timestamp is equal to or later than a requested time using `O(log n)` search.
+
+[View the Binary Search Server Log Challenge](../../../challenges/binary-search-log-server/README.md)
+
+---
+
 ## Key Takeaway
 
 The most important lesson from this chapter is not simply how to implement Binary Search.
