@@ -51,7 +51,7 @@ def visualize_binary_search(arr, target):
     print(f"Target {target} not found in the array.")
     return None
 
+if __name__ == "__main__":
+    arr = [5, 10, 15, 20, 25, 30, 35]
 
-arr = [5, 10, 15, 20, 25, 30, 35]
-
-visualize_binary_search(arr, 25)
+    visualize_binary_search(arr, 25)

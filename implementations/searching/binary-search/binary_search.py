@@ -1,24 +1,39 @@
-#arr = [5,10,15,20,25,30,35]
-#index =0, 1, 2, 3  4 ,5, 6
-#target = 25  index = 4
-
 def binary_search(arr, target):
+    """
+    Search for a target value in a sorted list using Binary Search.
+
+    Args:
+        arr: A sorted list of values.
+        target: The value to search for.
+
+    Returns:
+        The index of the target if found, otherwise None.
+
+    Time Complexity:
+        O(log n)
+
+    Space Complexity:
+        O(1)
+    """
     low = 0
-    high = len(arr)-1  # last valid index
-    
+    high = len(arr) - 1
+
     while low <= high:
-        mid = (low + high) // 2   # middle index of the current search range
+        mid = (low + high) // 2
         guess = arr[mid]
-        
+
         if guess == target:
             return mid
-        elif guess > target:
+
+        if guess > target:
             high = mid - 1
         else:
             low = mid + 1
-    
-    return -1  # target not found
 
-myarr = [5,10,15,20,25,30,35]
+    return None
 
-print(binary_search(myarr, 45))
+
+if __name__ == "__main__":
+    myarr = [5, 10, 15, 20, 25, 30, 35]
+
+    print(binary_search(myarr, 45))

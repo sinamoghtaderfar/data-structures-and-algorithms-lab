@@ -27,7 +27,7 @@ def visualize_binary_search(arr, target):
     high = len(arr) - 1
     step = 1
 
-    output_dir = Path("output")
+    output_dir = Path(__file__).parent / "output"
     output_dir.mkdir(exist_ok=True)
 
     has_gui = gui_available()
