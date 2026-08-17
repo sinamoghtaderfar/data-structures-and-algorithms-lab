@@ -8,7 +8,7 @@ def find_first_log_at_or_after(logs, target_time):
         target_time: Timestamp to search for.
 
     Returns:
-        The index of the first matching log, otherwise None.
+        The index of the first log at or after target_time, otherwise None.
 
     Time Complexity:
         O(log n)

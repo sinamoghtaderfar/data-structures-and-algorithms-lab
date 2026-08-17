@@ -69,3 +69,16 @@ def test_duplicate_timestamps_returns_first():
     )
 
     assert result == 1
+    
+def test_returns_first_log_when_timestamps_are_duplicated():
+    logs = [
+        ("10:00:00", "Server started"),
+        ("10:05:00", "Request A"),
+        ("10:05:00", "Request B"),
+        ("10:05:00", "Request C"),
+        ("10:10:00", "Server warning"),
+    ]
+
+    result = find_first_log_at_or_after(logs, "10:05:00")
+
+    assert result == 1

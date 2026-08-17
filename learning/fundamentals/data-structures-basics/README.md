@@ -1,96 +1,103 @@
-[English](./README.md) | [فارسی](./README.fa.md)
+[فارسی](./README.fa.md)
 
 # Data Structures Fundamentals
 
-These are my notes on the basic data structures and complexity concepts I want to understand before going deeper into algorithms.
+These are my foundation notes on data structures and complexity.
 
-The goal of this document is not to cover every detail or implement every data structure from scratch. Instead, I want to build a clear mental model of the most common structures, understand how they behave, and know why I might choose one over another.
+I am not trying to turn this document into a complete computer science textbook. The goal is simpler: build a strong mental model of the structures I will keep seeing while learning algorithms, understand their basic trade-offs, and know why I might choose one structure over another.
 
-Later in this repository, I will study and implement many of these concepts in much more detail.
+Later in this repository, I will implement and explore many of these structures in much more detail.
 
 ---
 
-## 1. What Is a Data Structure?
+## 1. Data Structures vs Algorithms
 
-A **data structure** is a way of organizing and storing data so that it can be used efficiently.
+A **data structure** is a way of organizing and storing data.
 
-Programs constantly work with data:
+An **algorithm** is a sequence of steps used to solve a problem.
 
-* users
-* products
-* messages
-* numbers
-* files
-* tasks
-* locations
-* relationships between objects
+They are closely related, but they answer different questions.
 
-The way we organize that data affects how easily and efficiently we can work with it.
+A data structure helps answer questions like:
 
-For example, imagine that we have one million user IDs and want to find a particular one.
+* How should I store the data?
+* How do I access it?
+* How expensive is insertion or deletion?
+* How naturally can I represent relationships?
+* What operations should be fast?
 
-Depending on how the data is stored and which algorithm we use, finding that user could be very fast or unnecessarily slow.
+An algorithm asks:
 
-This is why data structures and algorithms are closely related.
+> What steps should I perform to get the result I want?
 
-A data structure answers questions such as:
-
-* How should the data be stored?
-* How can I access it?
-* How can I search it?
-* How can I insert new data?
-* How can I remove data?
-
-An algorithm answers a different question:
-
-> What sequence of steps should I use to solve a problem?
-
-### Simple Example
-
-Suppose we have:
+For example:
 
 ```text
 [10, 20, 30, 40, 50]
 ```
 
-This data is stored as a sequence.
+The sequence itself is a way of organizing the data.
 
-If I want the third element, the structure allows me to access it directly by its position.
+If I already know that I want the value at index `3`, indexed access gives me:
 
-If I want to find the number `40`, I need an algorithm that searches through the data.
+```text
+40
+```
 
-So, in simple terms:
+But if I only know that I want to find the value `40`, I need a search strategy.
 
-> **Data structures organize data. Algorithms operate on data.**
+That leads to one of the most useful mental models in this repository:
+
+> **Data structures organize data. Algorithms operate on that data.**
+
+Choosing the right combination of the two can dramatically change the performance and simplicity of a solution.
 
 ---
 
-# 2. Arrays and Lists
+## 2. A Small Complexity Primer
 
-An array is one of the most fundamental data structures.
+Before comparing data structures, I need a basic way to describe how their cost grows as the amount of data grows.
 
-It stores multiple values in an ordered sequence.
+That is where **Big O notation** becomes useful.
+
+Some common complexities are:
+
+| Complexity   | Rough idea                                              |
+| ------------ | ------------------------------------------------------- |
+| `O(1)`       | Constant work                                           |
+| `O(log n)`   | The problem shrinks dramatically each step              |
+| `O(n)`       | Work grows roughly with the number of elements          |
+| `O(n log n)` | Common in efficient sorting algorithms                  |
+| `O(n²)`      | Often involves comparing many elements with many others |
 
 For example:
 
 ```text
-[10, 20, 30, 40]
+Accessing arr[500]      -> O(1)
+Scanning an entire list -> O(n)
+Binary Search           -> O(log n)
 ```
 
-Each element has a position called an **index**.
+Big O does not tell me the exact running time in milliseconds.
+
+It tells me how the amount of work grows as the input becomes larger.
+
+That distinction is important.
+
+---
+
+## 3. Arrays and Python Lists
+
+An array stores values in an ordered sequence.
+
+Conceptually:
 
 ```text
 Index:   0   1   2   3
 Value:  10  20  30  40
 ```
 
-So the value at index `2` is:
-
-```text
-30
-```
-
-In Python, I will often work with `list`:
+If I know the index, I can directly access the value:
 
 ```python
 numbers = [10, 20, 30, 40]
@@ -104,46 +111,43 @@ Output:
 30
 ```
 
-Python lists are not exactly the same as low-level fixed-size arrays used in languages such as C or C++, but they provide a similar indexed sequence abstraction for many everyday operations.
+### Python's `list`
 
-## Why Arrays Are Useful
+Python's built-in `list` is implemented as a **dynamic array**.
 
-Arrays are useful when:
+That means it behaves differently from a low-level fixed-size array in languages like C, but it still gives me fast indexed access and dynamically grows when needed.
 
-* order matters
-* I need access by position
-* I have many similar values
-* I frequently iterate over all elements
+This distinction matters because I should not mentally treat every programming-language "list" as a linked list.
 
-Examples include:
-
-```text
-temperatures
-user IDs
-scores
-product prices
-coordinates
-```
-
-## Access
-
-Accessing an element by index is very fast.
+In Python:
 
 ```python
-numbers[3]
+numbers = [10, 20, 30]
 ```
 
-For an array-like structure, indexed access is generally:
+is an array-like dynamic sequence.
+
+### Indexed Access
+
+Access by index is normally:
 
 ```text
 O(1)
 ```
 
-The size of the array does not significantly change how many steps are needed to access a known index.
+Example:
 
-## Search
+```python
+numbers[2]
+```
 
-If the value's position is unknown, I may need to inspect elements one by one.
+The important idea is that Python does not need to start from the first element and walk through every previous item.
+
+It can directly access the requested position.
+
+### Searching
+
+If I do not know the index and simply scan for a value:
 
 ```text
 [3, 8, 12, 19, 25]
@@ -153,19 +157,19 @@ Find 19:
 3 → 8 → 12 → 19
 ```
 
-A simple linear search can require:
+the search may require:
 
 ```text
 O(n)
 ```
 
-operations.
+time.
 
-## Insertion and Deletion
+A large list may therefore be excellent for indexed access while still being relatively expensive to search linearly.
 
-Insertion and deletion can be more expensive when elements need to be shifted.
+### Insertion and Deletion
 
-For example:
+Inserting into the middle can require later elements to move.
 
 ```text
 Before:
@@ -177,88 +181,65 @@ Insert 15:
 [10, 15, 20, 30, 40]
 ```
 
-Some existing elements may need to move.
+That shifting is one reason middle insertion is generally more expensive than direct indexed access.
 
-The exact behavior depends on the language and implementation.
-
-## Mental Model
+### Mental Model
 
 I think of an array as:
 
-> A row of numbered boxes.
+> **A row of numbered boxes.**
 
 If I know the box number, I can go directly to it.
 
-## Key Takeaway
+### Good Fit
 
-Arrays are excellent when I need:
+Arrays are a strong choice when:
 
-* ordered data
-* fast indexed access
-* straightforward iteration
+* order matters;
+* indexed access matters;
+* I frequently iterate over elements;
+* data naturally belongs in a sequence.
 
 ---
 
-# 3. Linked Lists
+## 4. Linked Lists
 
-A **linked list** also stores a sequence of values, but it works differently from an array.
+A **linked list** also represents a sequence, but the elements are connected differently.
 
-Instead of relying mainly on positions, a linked list is built from objects called **nodes**.
+Instead of relying on contiguous indexed positions, a linked list consists of **nodes**.
 
-A simple linked list might look like:
+A simple singly linked list:
 
 ```text
-[10] → [20] → [30] → [40]
+[10] → [20] → [30] → [40] → None
 ```
 
-Each node usually contains:
+Each node usually stores:
 
 ```text
 value
 next
 ```
 
-For example:
+Conceptually:
 
 ```text
 Node
 ├── value: 20
-└── next: reference to node containing 30
+└── next: reference to the next node
 ```
 
-The nodes form a chain.
+### Traversal
 
-## What Is a Node?
+If I want the fourth node, I normally cannot jump directly to it.
 
-A node is simply one element in a larger structure.
-
-For example:
-
-```text
-[10] → [20] → [30]
-```
-
-There are three nodes.
-
-Each one stores some data and a reference to another node.
-
-## Traversal
-
-With an array, I can often directly access something like:
-
-```text
-element at index 500
-```
-
-With a basic linked list, I usually start from the beginning and follow the links:
+I follow the chain:
 
 ```text
 10 → 20 → 30 → 40
 ```
 
-This process is called **traversal**.
-
-Finding an element by position may therefore require:
+That means accessing an arbitrary position usually requires:
 
 ```text
 O(n)
@@ -266,126 +247,103 @@ O(n)
 
 time.
 
-## Why Use a Linked List?
+### Insertion
 
-Linked lists can be useful when elements need to be connected dynamically and when insertion or deletion at a known position should not require shifting many other elements.
-
-For example:
+Suppose I already have a reference to node `B`:
 
 ```text
 A → B → C
 ```
 
-If I already have the right references, inserting `X` between `B` and `C` can conceptually become:
+To insert `X`:
 
 ```text
 A → B → X → C
 ```
 
-Instead of shifting an entire sequence, the connections can be changed.
+the link updates themselves can be performed in:
 
-## Array vs Linked List
+```text
+O(1)
+```
 
-A simplified comparison:
+However, there is an important detail:
 
-| Operation                       |                Array |           Linked List |
-| ------------------------------- | -------------------: | --------------------: |
-| Access by index                 |                 Fast |                Slower |
-| Sequential traversal            |                 Good |                  Good |
-| Insert/delete at known location | May require shifting |      Can be efficient |
-| Memory layout                   |      More contiguous | Nodes may be separate |
+> If I first need to search for `B`, finding it may still require `O(n)` time.
 
-Real implementations have additional details, but this comparison is enough for my current level.
+That distinction is easy to miss.
 
-## Mental Model
+### Array vs Linked List
+
+| Operation                      |        Dynamic Array |       Linked List |
+| ------------------------------ | -------------------: | ----------------: |
+| Indexed access                 |               `O(1)` |            `O(n)` |
+| Search                         |               `O(n)` |            `O(n)` |
+| Insert/delete at known node    | May require shifting |     Can be `O(1)` |
+| Memory locality                |         Usually good |    Usually poorer |
+| Extra pointer/reference memory |                  Low | Required per node |
+
+### Mental Model
 
 I think of a linked list as:
 
-> A treasure hunt where every location tells me where the next location is.
+> **A treasure hunt where every location tells me where the next location is.**
 
-I cannot necessarily jump directly to the tenth node. I follow the chain.
-
-## Key Takeaway
-
-A linked list is a sequence of connected nodes.
-
-The important concepts are:
-
-* node
-* value
-* next reference
-* traversal
+I cannot magically jump to node number 500. I follow the links.
 
 ---
 
-# 4. Stacks
+## 5. Stacks
 
-A **stack** is a data structure that follows:
+A **stack** follows:
 
 ```text
 LIFO
 ```
 
-which means:
+meaning:
 
 > **Last In, First Out**
 
-The easiest analogy is a stack of plates.
-
-If I place plates like this:
+A stack of plates is the classic example.
 
 ```text
-C
-B
-A
+Top
+ ↓
+ C
+ B
+ A
 ```
 
-`C` was placed last.
+`C` was added last, so it is removed first.
 
-It is also the first plate I remove.
+### Main Operations
 
-## Main Operations
-
-### Push
-
-Add an item to the top.
+Push:
 
 ```text
-Before:
-
-B
-A
-
 push(C)
-
-After:
-
-C
-B
-A
 ```
 
-### Pop
+adds an item to the top.
 
-Remove the top item.
+Pop:
 
 ```text
-C
-B
-A
-
 pop()
-
-returns C
 ```
 
-### Peek / Top
+removes the top item.
 
-Look at the top element without removing it.
+Peek:
 
-## Python Example
+```text
+peek()
+```
 
-A Python list can be used as a simple stack:
+reads the top item without removing it.
+
+### Python Example
 
 ```python
 stack = []
@@ -394,9 +352,9 @@ stack.append("A")
 stack.append("B")
 stack.append("C")
 
-last_item = stack.pop()
+item = stack.pop()
 
-print(last_item)
+print(item)
 ```
 
 Output:
@@ -405,77 +363,37 @@ Output:
 C
 ```
 
-## Common Uses
+Using the end of a Python list this way gives efficient stack behavior.
 
-Stacks appear in many areas of programming.
+### Where Stacks Appear
 
-Examples:
+Stacks are used in:
 
-* function calls
-* recursion
-* undo functionality
-* expression parsing
-* syntax processing
-* depth-first search
-* browser-like navigation history
+* function calls;
+* recursion;
+* undo systems;
+* parsing;
+* expression evaluation;
+* Depth-First Search;
+* backtracking.
 
-## Stack and Function Calls
+### Mental Model
 
-When one function calls another function, the program needs to remember where it should return afterward.
-
-Conceptually, this behavior is closely related to a stack.
-
-This becomes particularly important when learning recursion.
-
-## Mental Model
-
-I think of a stack as:
-
-> The most recent unfinished thing gets handled first.
-
-## Key Takeaway
-
-Remember:
-
-```text
-Stack = LIFO
-```
-
-Last in, first out.
+> **The most recently added unfinished task gets handled first.**
 
 ---
 
-# 5. Queues
+## 6. Queues
 
-A **queue** follows the opposite idea:
+A **queue** follows:
 
 ```text
 FIFO
 ```
 
-which means:
+meaning:
 
 > **First In, First Out**
-
-The easiest example is a real-world queue.
-
-Suppose people arrive in this order:
-
-```text
-A → B → C → D
-```
-
-`A` arrived first, so `A` should normally be processed first.
-
-## Main Operations
-
-### Enqueue
-
-Add something to the end of the queue.
-
-### Dequeue
-
-Remove something from the front of the queue.
 
 Conceptually:
 
@@ -486,84 +404,86 @@ Front                 Back
 A → B → C → D
 ```
 
-After one dequeue:
+`A` arrived first, so `A` leaves first.
+
+### Main Operations
+
+Enqueue:
 
 ```text
-B → C → D
+add to the back
 ```
 
-## Common Uses
-
-Queues are useful when work should happen in arrival order.
-
-Examples:
-
-* task processing
-* print jobs
-* request handling
-* message processing
-* scheduling
-* Breadth-First Search (BFS)
-
-## Stack vs Queue
-
-This distinction is important:
+Dequeue:
 
 ```text
-Stack
-Last In → First Out
-
-Queue
-First In → First Out
+remove from the front
 ```
 
-## Mental Model
+### Python Example
 
-I think of a queue as:
+For a real queue in Python, `collections.deque` is usually a better choice than repeatedly removing the first element of a list.
 
-> People waiting in line.
+```python
+from collections import deque
 
-The person who arrived first should usually be served first.
+queue = deque()
 
-## Key Takeaway
+queue.append("A")
+queue.append("B")
+queue.append("C")
 
-Remember:
+first = queue.popleft()
+
+print(first)
+```
+
+Output:
 
 ```text
-Queue = FIFO
+A
 ```
 
-First in, first out.
+### Where Queues Appear
+
+Queues are useful in:
+
+* task scheduling;
+* message processing;
+* request handling;
+* print jobs;
+* Breadth-First Search;
+* producer/consumer systems.
+
+### Stack vs Queue
+
+```text
+Stack -> LIFO
+Queue -> FIFO
+```
+
+That small distinction changes the behavior of entire algorithms.
 
 ---
 
-# 6. Hash Tables
+## 7. Hash Tables
 
-A **hash table** stores data using **keys and values**.
+A **hash table** stores data using keys and values.
 
-For example:
+Conceptually:
 
 ```text
 name → Sina
 city → Bamberg
-age  → 25
+role → developer
 ```
 
-Instead of saying:
-
-> Give me the third element.
-
-I can say:
-
-> Give me the value associated with the key `name`.
-
-In Python, dictionaries are based on this general idea.
+Python's `dict` is built around this idea.
 
 ```python
 user = {
     "name": "Sina",
     "city": "Bamberg",
-    "age": 25,
 }
 
 print(user["name"])
@@ -575,9 +495,9 @@ Output:
 Sina
 ```
 
-## Why Is This Useful?
+### Why Hash Tables Are Powerful
 
-Imagine storing product prices:
+Suppose I have:
 
 ```python
 prices = {
@@ -587,19 +507,15 @@ prices = {
 }
 ```
 
-To retrieve the apple price:
+I can ask directly for:
 
 ```python
 prices["apple"]
 ```
 
-I do not conceptually need to search every product one by one.
+Instead of conceptually scanning all products one by one.
 
-Hash tables are designed to make this kind of lookup very efficient.
-
-## Hash Function
-
-Behind a hash table is the idea of a **hash function**.
+### Hash Function
 
 Very roughly:
 
@@ -608,79 +524,48 @@ key
  ↓
 hash function
  ↓
-location
+internal location
 ```
 
-The hash function helps determine where the value associated with a key should be stored.
+The hash function helps determine where information should be stored or looked up.
 
-I do not need to understand the internal implementation deeply yet.
+### Complexity
 
-The important idea is:
-
-> A key can be transformed into information that helps locate its value efficiently.
-
-## Complexity
-
-Average-case lookup in a well-designed hash table is usually described as:
+Average-case lookup, insertion, and deletion are commonly described as:
 
 ```text
 O(1)
 ```
 
-The same is generally true for insertion and deletion in the average case.
+But this is an **average-case** expectation.
 
-However, `O(1)` here does not mean that absolutely every possible operation always takes exactly the same amount of time.
-
-There are implementation details and edge cases.
-
-## Collision
-
-Sometimes two different keys can map to the same internal location.
-
-This is called a **collision**.
-
-Hash tables have strategies for handling collisions.
-
-For now, knowing that collisions exist is enough.
-
-## Common Uses
-
-Hash tables are everywhere:
-
-* dictionaries
-* caches
-* configuration values
-* counting frequencies
-* lookup tables
-* user data
-* indexes
-* sets
-
-## Mental Model
-
-I think of a hash table as:
-
-> A labeled storage system.
-
-Instead of remembering a numerical position, I use a meaningful key.
-
-## Key Takeaway
-
-A hash table stores:
+In pathological situations, performance can degrade, and worst-case lookup can reach:
 
 ```text
-key → value
+O(n)
 ```
 
-and is designed for very fast lookup by key.
+### Collision
+
+Two different keys can sometimes map to the same internal area.
+
+That is called a:
+
+```text
+collision
+```
+
+Real hash tables use collision-handling strategies internally.
+
+### Mental Model
+
+> **A labeled storage system where I ask for data by key instead of position.**
 
 ---
 
-# 7. Trees
+## 8. Trees
 
-A **tree** is a hierarchical data structure.
-
-Unlike a simple sequence, elements can have parent-child relationships.
+A **tree** represents hierarchical relationships.
 
 Example:
 
@@ -692,88 +577,44 @@ Example:
     D   E
 ```
 
-## Important Terms
-
-### Root
-
-The top node.
-
-In the example:
+Some important terms:
 
 ```text
-A
+A -> root
+B -> parent of D and E
+D -> child of B
+C, D, E -> leaves
 ```
 
-is the root.
+### Real Example
 
-### Parent
-
-A node that has nodes below it.
-
-For example:
+A filesystem naturally looks tree-like:
 
 ```text
-B
+projects/
+├── backend/
+│   ├── api/
+│   └── database/
+└── frontend/
+    ├── components/
+    └── pages/
 ```
 
-is the parent of `D` and `E`.
+### Binary Tree
 
-### Child
-
-A node directly below another node.
-
-`D` and `E` are children of `B`.
-
-### Leaf
-
-A node with no children.
-
-In the example:
+A binary tree allows each node to have at most two children.
 
 ```text
-D
-E
-C
+       10
+      /  \
+     5    20
 ```
 
-are leaves.
+### Binary Search Tree
 
-## Real-World Example
+A Binary Search Tree adds an ordering relationship.
 
-A directory structure can be thought of as a tree:
-
-```text
-Projects
-├── backend
-│   ├── api
-│   └── database
-│
-└── frontend
-    ├── components
-    └── pages
-```
-
-Other hierarchical systems also naturally resemble trees.
-
-## Binary Tree
-
-A **binary tree** is a tree where each node can have at most two children.
-
-For example:
-
-```text
-        10
-       /  \
-      5    20
-```
-
-I only need to recognize this concept for now.
-
-## Binary Search Tree
-
-A **Binary Search Tree (BST)** adds an ordering rule.
-
-A simplified version is:
+A simplified rule:
 
 ```text
 smaller values ← node → larger values
@@ -789,39 +630,24 @@ Example:
     2   7
 ```
 
-I will study tree algorithms and BST behavior in more detail later.
+The important point for now is not memorizing every tree operation.
 
-## Mental Model
-
-I think of a tree as:
-
-> A hierarchy where one thing can branch into several smaller things.
-
-## Key Takeaway
-
-For now, I need to understand:
-
-* node
-* root
-* parent
-* child
-* leaf
-* hierarchy
+It is recognizing that trees are useful when data naturally has **hierarchy or ordered branching**.
 
 ---
 
-# 8. Graphs
+## 9. Graphs
 
-A **graph** represents relationships between objects.
+A **graph** represents relationships between entities.
 
-Graphs consist mainly of:
+Graphs contain:
 
 ```text
-Vertices / Nodes
-Edges
+vertices / nodes
+edges
 ```
 
-A graph might look like:
+Example:
 
 ```text
 A ----- B
@@ -830,613 +656,112 @@ A ----- B
 C ----- D
 ```
 
-`A`, `B`, `C`, and `D` are vertices.
+### Why Graphs Matter
 
-The lines between them are edges.
+Graphs appear in:
 
-## Why Graphs Matter
+* road networks;
+* social networks;
+* computer networks;
+* dependency systems;
+* flight routes;
+* recommendation systems;
+* web links.
 
-Many real-world problems are naturally graphs.
-
-Examples:
-
-* road networks
-* social networks
-* computer networks
-* airline routes
-* recommendation systems
-* dependencies
-* website links
-
-## Social Network Example
-
-Suppose:
-
-```text
-Sina ----- Ali
-  |
-  |
- Reza ---- Sara
-```
-
-People are nodes.
-
-Relationships are edges.
-
-## Undirected Graph
-
-An undirected connection has no direction.
+### Undirected Graph
 
 ```text
 A ----- B
 ```
 
-Conceptually:
+The connection exists both ways.
 
-```text
-A is connected to B
-B is connected to A
-```
-
-## Directed Graph
-
-A directed graph uses arrows.
+### Directed Graph
 
 ```text
 A → B
 ```
 
-This relationship does not necessarily imply:
+The relationship has a direction.
+
+For example, one account can follow another without being followed back.
+
+### Weighted Graph
+
+Edges can also carry values:
 
 ```text
-B → A
+A --5--> B
 ```
 
-A following relationship on a social platform is a good example.
-
-One user can follow another without being followed back.
-
-## Weighted Graph
-
-Some graphs assign values to edges.
-
-For example:
-
-```text
-Berlin ---- 190 km ---- Leipzig
-```
-
-The weight might represent:
-
-* distance
-* time
-* cost
-* risk
-* capacity
-
-Weighted graphs become important for algorithms such as shortest-path algorithms.
-
-## Graph Algorithms
-
-Later, I will study algorithms such as:
-
-```text
-Breadth-First Search (BFS)
-Depth-First Search (DFS)
-Dijkstra's Algorithm
-```
-
-These algorithms answer questions such as:
-
-* Can I reach one node from another?
-* What nodes are connected?
-* What is the shortest path?
-* What should I visit first?
-
-## Mental Model
-
-I think of a graph as:
-
-> Things plus relationships between those things.
-
-## Key Takeaway
-
-A graph consists of:
-
-```text
-nodes + connections
-```
-
-and is especially useful for modeling relationships and networks.
-
----
-
-# 9. Common Data Structure Operations
-
-Different data structures support different operations with different performance characteristics.
-
-These terms appear frequently when studying algorithms.
-
-## Access
-
-Retrieve an element when its location or key is already known.
-
-Example:
-
-```python
-numbers[3]
-```
-
-## Search
-
-Find an element when its location is unknown.
-
-Example:
-
-```text
-Find 42 inside a collection.
-```
-
-## Insert
-
-Add a new element.
-
-Example:
-
-```text
-Before:
-
-[10, 20, 30]
-
-After inserting 15:
-
-[10, 15, 20, 30]
-```
-
-## Delete
-
-Remove an element.
-
-Example:
-
-```text
-Before:
-
-[10, 20, 30]
-
-Delete 20:
-
-[10, 30]
-```
-
-## Traverse
-
-Visit elements one after another.
-
-For example:
-
-```text
-A → B → C → D
-```
-
-Traversal becomes especially important in:
-
-* linked lists
-* trees
-* graphs
-
-## Why These Operations Matter
-
-When choosing a data structure, I should not only ask:
-
-> Can this structure store my data?
-
-I should also ask:
-
-> Which operations will my program perform most often?
-
-For example, one structure might provide very fast lookup but be less convenient for another operation.
-
-There is usually a trade-off.
-
----
-
-# 10. Big O Basics
-
-When comparing algorithms and data structures, I need a way to describe how their work grows as the input grows.
-
-This is where **Big O notation** becomes useful.
-
-Big O is not mainly about measuring exact execution time in seconds.
-
-Instead, it describes how the amount of work grows when the input size grows.
-
-Suppose:
-
-```text
-n = number of items
-```
-
----
-
-## O(1) — Constant Time
-
-Example:
-
-```python
-numbers[5]
-```
-
-If I already know the index, accessing that position does not require searching through every previous value.
-
-Conceptually:
-
-```text
-10 items       → roughly constant work
-1,000 items    → roughly constant work
-1,000,000 items → roughly constant work
-```
-
-This is called:
-
-```text
-O(1)
-```
+That value could represent:
+
+* distance;
+* cost;
+* travel time;
+* latency;
+* risk.
+
+This is where algorithms such as Dijkstra's algorithm become important later.
 
 ### Mental Model
 
-> I know exactly where to go.
+> **Nodes are things. Edges describe relationships between those things.**
 
 ---
 
-## O(log n) — Logarithmic Time
+## 10. Quick Comparison
 
-A common example is **Binary Search**.
+| Structure     | Main Strength             | Typical Cost / Idea                            |
+| ------------- | ------------------------- | ---------------------------------------------- |
+| Dynamic Array | Fast indexed access       | Index access `O(1)`                            |
+| Linked List   | Flexible node connections | Access `O(n)`                                  |
+| Stack         | LIFO processing           | Push/pop `O(1)`                                |
+| Queue         | FIFO processing           | Enqueue/dequeue `O(1)` with suitable structure |
+| Hash Table    | Fast lookup by key        | Average `O(1)`                                 |
+| Tree          | Hierarchical organization | Depends on tree type                           |
+| Graph         | Modeling relationships    | Depends on representation and algorithm        |
 
-Instead of checking every item, Binary Search repeatedly removes about half of the remaining possibilities.
+There is no universally "best" data structure.
 
-Imagine one million sorted values.
+The useful question is:
 
-A linear approach may inspect a huge number of elements.
+> **Which operations matter most for this problem?**
 
-Binary Search only needs roughly:
-
-```text
-20 comparisons
-```
-
-in the worst-case scale for around one million values.
-
-That is extremely powerful.
-
-### Mental Model
-
-> Every step removes a large part of the remaining problem.
+A structure that is perfect for one workload can be a poor choice for another.
 
 ---
 
-## O(n) — Linear Time
+## 11. What I Want to Remember
 
-Suppose I search through a list one element at a time:
-
-```python
-for number in numbers:
-    if number == target:
-        break
-```
-
-If there are more elements, there may be proportionally more work.
+If I forget the details, these are the ideas I want to keep:
 
 ```text
-10 items      → up to about 10 checks
-100 items     → up to about 100 checks
-1,000 items   → up to about 1,000 checks
+Array       -> numbered positions
+Linked List -> connected nodes
+Stack       -> LIFO
+Queue       -> FIFO
+Hash Table  -> key → value
+Tree        -> hierarchy
+Graph       -> relationships
 ```
 
-This is:
+More importantly:
 
-```text
-O(n)
-```
+> Choosing a data structure is about trade-offs.
 
-### Mental Model
-
-> I may need to look at everything once.
+Fast access, fast insertion, memory usage, ordering, and relationships all push the design in different directions.
 
 ---
 
-## O(n log n)
+## 12. Where This Goes Next
 
-This complexity appears in several efficient sorting algorithms.
+This document is only the foundation.
 
-Examples include:
+As I move deeper into the repository, I will study individual structures and algorithms separately, implement them, test them, visualize them where useful, and apply them to practical problems.
 
-```text
-Merge Sort
-Heap Sort
-Quicksort — average case
-```
+The goal is not to memorize definitions.
 
-I do not need to understand the mathematical details yet.
+The goal is to understand the behavior well enough that, when I see a problem, I can begin asking:
 
-For now, I only need to recognize that:
-
-```text
-O(n log n)
-```
-
-usually scales much better than:
-
-```text
-O(n²)
-```
-
-for large inputs.
-
----
-
-## O(n²) — Quadratic Time
-
-A common example is a nested loop:
-
-```python
-for x in numbers:
-    for y in numbers:
-        pass
-```
-
-If the list contains `n` items, the inner work may happen approximately `n × n` times.
-
-For example:
-
-```text
-100 items
-100 × 100
-= 10,000 operations
-```
-
-With:
-
-```text
-1,000 items
-```
-
-we may reach roughly:
-
-```text
-1,000,000 operations
-```
-
-This can become expensive quickly.
-
-### Mental Model
-
-> For every item, I may need to process every item again.
-
----
-
-# 11. Comparing Growth Rates
-
-A simplified order from better scaling to worse scaling is:
-
-```text
-O(1)
- ↓
-O(log n)
- ↓
-O(n)
- ↓
-O(n log n)
- ↓
-O(n²)
-```
-
-For very large datasets, these differences matter a lot.
-
-An algorithm that looks perfectly fine with 100 elements may behave very differently with 100 million elements.
-
-That is why I should not only ask:
-
-> Does my code work?
-
-I should also ask:
-
-> How does my solution behave when the input becomes much larger?
-
----
-
-# 12. Quick Comparison
-
-This is only a simplified overview. Exact complexity depends on the implementation.
-
-| Structure    | Main Idea               | Typical Strength                   |
-| ------------ | ----------------------- | ---------------------------------- |
-| Array / List | Ordered sequence        | Fast indexed access                |
-| Linked List  | Connected nodes         | Flexible node insertion/deletion   |
-| Stack        | LIFO                    | Process most recent item first     |
-| Queue        | FIFO                    | Process items in arrival order     |
-| Hash Table   | Key-value mapping       | Fast lookup by key                 |
-| Tree         | Hierarchical nodes      | Represent hierarchy                |
-| Graph        | Nodes and relationships | Represent networks and connections |
-
----
-
-# 13. Mental Models
-
-These simple mental models help me remember the structures.
-
-### Array
-
-```text
-A row of numbered boxes.
-```
-
-### Linked List
-
-```text
-A chain where every node knows the next node.
-```
-
-### Stack
-
-```text
-A stack of plates.
-Last added → first removed.
-```
-
-### Queue
-
-```text
-People waiting in line.
-First arrived → first served.
-```
-
-### Hash Table
-
-```text
-A storage system with labels.
-Key → Value
-```
-
-### Tree
-
-```text
-A hierarchy that branches downward.
-```
-
-### Graph
-
-```text
-Objects connected by relationships.
-```
-
----
-
-# 14. What I Need to Remember Before Studying Algorithms
-
-At this point, I do not need to implement every data structure from memory.
-
-Before moving deeper into algorithms, I mainly want to remember the following:
-
-### Arrays / Lists
-
-* ordered collection
-* index
-* fast indexed access
-* searching may require traversal
-
-### Linked Lists
-
-* made of nodes
-* nodes point to other nodes
-* no normal direct indexed access
-* traversal follows links
-
-### Stacks
-
-```text
-LIFO
-```
-
-### Queues
-
-```text
-FIFO
-```
-
-### Hash Tables
-
-```text
-key → value
-```
-
-Average lookup is usually very fast.
-
-### Trees
-
-Understand:
-
-```text
-root
-parent
-child
-leaf
-```
-
-### Graphs
-
-Understand:
-
-```text
-vertex / node
-edge
-directed
-undirected
-weighted
-```
-
-### Big O
-
-Recognize:
-
-```text
-O(1)
-O(log n)
-O(n)
-O(n log n)
-O(n²)
-```
-
----
-
-# 15. Final Takeaway
-
-The most important lesson for me is that there is no single data structure that is always the best choice.
-
-Each structure makes certain operations easier or faster and introduces its own trade-offs.
-
-Before choosing a structure, I should think about:
-
-```text
-What data am I storing?
-
-How will I access it?
-
-Will I search frequently?
-
-Will I insert or delete frequently?
-
-Does order matter?
-
-Are there relationships between the values?
-
-How large could the data become?
-```
-
-Understanding these questions will make it easier to understand why different algorithms use different data structures.
-
-My next step is to study algorithms more deeply and gradually turn these concepts into real implementations, tests, visualizations, and performance experiments.
-
----
-
-## Study Status
-
-This document covers only the fundamentals I want to know before going deeper into Data Structures and Algorithms.
-
-More advanced topics such as the following will be studied separately:
-
-* doubly linked lists
-* circular linked lists
-* deques
-* heaps
-* priority queues
-* binary search trees
-* balanced trees
-* AVL trees
-* red-black trees
-* tries
-* disjoint sets / union-find
-* graph representations
-* advanced hashing techniques
-
-These topics are intentionally outside the scope of this introductory note.
+> **What structure fits this problem, and why?**

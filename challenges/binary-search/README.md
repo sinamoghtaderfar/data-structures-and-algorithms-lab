@@ -1,10 +1,14 @@
-[English](./README.md) | [فارسی](./README.fa.md)
+[فارسی](./README.fa.md)
 
-# Binary Search Challenge — Server Log Search
+# Binary Search Challenge — Server Log Boundary Search
 
-This challenge applies Binary Search to a more realistic problem using sorted server logs.
+This challenge takes Binary Search beyond exact-value lookup and applies it to a more realistic problem: finding the first server log at or after a requested time.
 
-The goal is to move beyond searching for an exact number in a simple array and adapt the Binary Search idea to a practical search problem.
+The main idea is simple:
+
+> Given sorted timestamps, find the **first position** whose timestamp is greater than or equal to the target.
+
+This is a boundary-search problem and a useful variation of Binary Search.
 
 ---
 
@@ -12,7 +16,7 @@ The goal is to move beyond searching for an exact number in a simple array and a
 
 A server stores its logs in chronological order.
 
-Each log contains:
+Each log contains a timestamp and a message:
 
 ```text
 (timestamp, message)
@@ -31,15 +35,54 @@ logs = [
 ]
 ```
 
-Write a function that receives a `target_time` and finds the **first log whose timestamp is equal to or later than the target time**.
+Implement a function:
 
-The condition is:
+```python
+find_first_log_at_or_after(logs, target_time)
+```
+
+that returns the index of the **first log whose timestamp is equal to or later than `target_time`**.
+
+In other words, find the first index satisfying:
 
 ```text
 timestamp >= target_time
 ```
 
+If no such log exists, return:
+
+```python
+None
+```
+
 The solution must use **Binary Search**.
+
+---
+
+## Why Binary Search?
+
+A straightforward solution could scan the logs from beginning to end:
+
+```python
+for log in logs:
+    ...
+```
+
+That works, but in the worst case it examines every log:
+
+```text
+O(n)
+```
+
+Because the logs are already sorted by timestamp, we can do better.
+
+Binary Search lets us repeatedly eliminate approximately half of the remaining search space:
+
+```text
+O(log n)
+```
+
+For a large log dataset, that difference can become significant.
 
 ---
 
@@ -51,17 +94,29 @@ Input:
 target_time = "10:08:12"
 ```
 
-The timestamp exists exactly in the log list:
+Logs:
 
 ```text
-Index:  0         1         2         3
-Time:   10:00:01  10:02:15  10:05:40  10:08:12
+Index:  0         1         2         3         4         5
+Time:   10:00:01  10:02:15  10:05:40  10:08:12  10:08:48  10:12:33
                                       ↑
+```
+
+The first timestamp satisfying:
+
+```text
+timestamp >= "10:08:12"
+```
+
+is at index:
+
+```text
+3
 ```
 
 Expected result:
 
-```text
+```python
 3
 ```
 
@@ -75,9 +130,9 @@ Input:
 target_time = "10:08:15"
 ```
 
-There is no log at exactly `10:08:15`.
+There is no log exactly at `10:08:15`.
 
-The closest surrounding timestamps are:
+The surrounding timestamps are:
 
 ```text
 10:08:12
@@ -86,25 +141,19 @@ The closest surrounding timestamps are:
 
 `10:08:12` is too early.
 
-The first timestamp that satisfies:
+`10:08:48` is the first timestamp satisfying:
 
 ```text
 timestamp >= target_time
 ```
 
-is:
-
-```text
-10:08:48
-```
-
 Expected result:
 
-```text
+```python
 4
 ```
 
-Because:
+because:
 
 ```python
 logs[4]
@@ -126,7 +175,7 @@ Input:
 target_time = "09:30:00"
 ```
 
-The first log already occurs after the requested time:
+The first log is already later than the requested time:
 
 ```text
 10:00:01
@@ -134,13 +183,13 @@ The first log already occurs after the requested time:
 
 Expected result:
 
-```text
+```python
 0
 ```
 
 ---
 
-## Example 4 — No Valid Log
+## Example 4 — Target After All Logs
 
 Input:
 
@@ -148,153 +197,179 @@ Input:
 target_time = "23:00:00"
 ```
 
-No log exists at or after this time.
+No timestamp satisfies:
+
+```text
+timestamp >= "23:00:00"
+```
 
 Expected result:
 
-```text
+```python
 None
 ```
 
 ---
 
-## Constraint
+## Example 5 — Duplicate Timestamps
 
-The solution should not scan the logs one by one.
-
-A linear search such as:
+Consider:
 
 ```python
-for log in logs:
-    ...
+logs = [
+    ("10:00:00", "Server started"),
+    ("10:05:00", "Request A"),
+    ("10:05:00", "Request B"),
+    ("10:05:00", "Request C"),
+    ("10:10:00", "Server warning"),
+]
 ```
 
-would have a worst-case running time of:
+Input:
 
-```text
-O(n)
+```python
+target_time = "10:05:00"
 ```
 
-Instead, the challenge should preserve the main advantage of Binary Search:
+There are multiple exact matches.
 
-```text
-O(log n)
+The requirement is to return the **first** valid log.
+
+Expected result:
+
+```python
+1
 ```
+
+This is an important detail.
+
+Finding *an* exact match is not enough — we need the **leftmost valid position**.
 
 ---
 
-## Key Idea
+## From Exact Search to Boundary Search
 
-Normal Binary Search usually searches for an exact value.
+A basic Binary Search often asks:
 
-For example:
+> Does this exact value exist?
 
-```text
-guess == target
-→ return the index
-```
+This challenge asks something slightly different:
 
-This challenge is slightly different because the exact target may not exist.
+> Where does the valid range begin?
 
-For example:
+For the condition:
 
 ```text
-target = 10:08:15
+timestamp >= target_time
 ```
 
-while the available timestamps are:
-
-```text
-10:08:12
-10:08:48
-```
-
-The algorithm must still return `10:08:48`.
-
-This means that while searching, some values can become possible answers.
-
----
-
-## Candidate
-
-If:
-
-```text
-guess > target_time
-```
-
-the current log is a valid possible answer.
-
-However, there might be another valid log closer to the target on the left side.
-
-Therefore, the current index is stored as a **candidate**, and Binary Search continues searching to the left.
+we want the leftmost timestamp for which the condition becomes true.
 
 Conceptually:
 
 ```text
-guess > target
+too early        valid
+   ↓               ↓
 
-        ↓
-
-save current index
-as candidate
-
-        ↓
-
-continue searching
-the left half
+10:00  10:05  10:08  10:12  10:20
+                ↑
+           first valid value
 ```
 
-If a better candidate is found later, it replaces the previous one.
+This type of problem is commonly described as a **lower-bound search**.
+
+---
+
+## The Candidate Idea
+
+During the search, suppose:
+
+```text
+guess >= target_time
+```
+
+The current log is a valid answer.
+
+But it may not be the **first** valid answer.
+
+There could be another valid timestamp further to the left.
+
+So instead of returning immediately, we:
+
+1. save the current index as a candidate;
+2. continue searching the left half.
+
+Conceptually:
+
+```text
+guess >= target
+
+      ↓
+
+current index is valid
+
+      ↓
+
+save candidate
+
+      ↓
+
+search left for an earlier valid index
+```
+
+If we find a better candidate, it replaces the previous one.
 
 ---
 
 ## Search Decisions
 
-The search follows three main cases.
+The algorithm only needs two cases.
 
-### Guess is smaller than the target
+### Case 1 — Guess Is Too Early
+
+If:
 
 ```text
 guess < target_time
 ```
 
-The current value and everything to its left are too early.
+then the current timestamp cannot be the answer.
 
-Search the right half.
+Because the data is sorted, everything to its left is also too early.
 
-```text
+So we discard that entire part:
+
+```python
 low = mid + 1
 ```
 
 ---
 
-### Guess exactly matches the target
+### Case 2 — Guess Is Valid
+
+If:
 
 ```text
-guess == target_time
+guess >= target_time
 ```
 
-The requested timestamp has been found.
+then the current index is a possible answer.
 
-Return its index.
+We save it:
 
----
-
-### Guess is greater than the target
-
-```text
-guess > target_time
-```
-
-The current log may be the answer.
-
-Save it as the current candidate and continue searching the left half.
-
-```text
+```python
 candidate = mid
+```
+
+but continue searching left:
+
+```python
 high = mid - 1
 ```
+
+because an earlier valid timestamp may still exist.
+
+This also correctly handles duplicate timestamps.
 
 ---
 
@@ -303,10 +378,10 @@ high = mid - 1
 Suppose:
 
 ```text
-target = 10:08:15
+target_time = "10:08:15"
 ```
 
-and the logs are:
+and:
 
 ```text
 10:00:01
@@ -317,44 +392,73 @@ and the logs are:
 10:12:33
 ```
 
-Binary Search may proceed like this:
+### Step 1
+
+Middle value:
 
 ```text
-Step 1
+10:05:40
+```
 
-guess = 10:05:40
+Comparison:
 
+```text
 10:05:40 < 10:08:15
+```
 
+So this value and everything to its left can be discarded.
+
+```text
 → search right
 ```
 
-Then:
+### Step 2
+
+Next middle value:
 
 ```text
-Step 2
+10:08:48
+```
 
-guess = 10:08:48
+Comparison:
 
-10:08:48 > 10:08:15
+```text
+10:08:48 >= 10:08:15
+```
 
-→ candidate = index 4
+This is a valid answer:
+
+```text
+candidate = index 4
+```
+
+But there may be an earlier valid value:
+
+```text
 → search left
 ```
 
-Then:
+### Step 3
+
+Next value:
 
 ```text
-Step 3
+10:08:12
+```
 
-guess = 10:08:12
+Comparison:
 
+```text
 10:08:12 < 10:08:15
+```
 
+So:
+
+```text
 → search right
 ```
 
-The search range becomes empty.
+The search range is now empty.
 
 The best candidate found was:
 
@@ -370,9 +474,31 @@ which corresponds to:
 
 ---
 
+## Why String Comparison Works Here
+
+The timestamps use the fixed-width format:
+
+```text
+HH:MM:SS
+```
+
+For zero-padded timestamps in this format, lexicographical string order matches chronological order within the same day.
+
+For example:
+
+```text
+"10:05:00" < "10:08:00" < "11:00:00"
+```
+
+That allows these timestamp strings to be compared directly in this challenge.
+
+For more complex real-world timestamps involving dates, time zones, or different formats, parsing them into proper datetime values would be safer.
+
+---
+
 ## Complexity
 
-Binary Search removes roughly half of the remaining search space after every comparison.
+Binary Search eliminates approximately half of the remaining search space after each comparison.
 
 Therefore:
 
@@ -380,7 +506,7 @@ Therefore:
 Time Complexity: O(log n)
 ```
 
-The algorithm only needs a few variables such as:
+The algorithm only needs a few additional variables:
 
 ```text
 low
@@ -389,7 +515,7 @@ mid
 candidate
 ```
 
-so the additional memory usage is constant:
+Therefore:
 
 ```text
 Space Complexity: O(1)
@@ -397,67 +523,82 @@ Space Complexity: O(1)
 
 ---
 
-## Implementation
+## Edge Cases
 
-The implementation for this challenge can be found here:
+The implementation should correctly handle:
 
-[View `binary_search_log_server.py`](./binary_search_log_server.py)
+- an exact timestamp;
+- a target between two timestamps;
+- a target before the first log;
+- a target after the last log;
+- an empty log list;
+- a single log entry;
+- duplicate timestamps.
+
+These cases are covered by the test suite.
 
 ---
 
-## Suggested Tests
+## Implementation
 
-Useful cases to test:
+The solution is available here:
 
-* Exact timestamp exists
-* Target is between two timestamps
-* Target is before the first log
-* Target is after the last log
-* Empty log list
-* Single log entry
+[`solution.py`](./solution.py)
+
+Tests:
+
+[`test_solution.py`](./test_solution.py)
+
+Run the tests from the repository root:
+
+```bash
+pytest challenges/binary-search/test_solution.py
+```
 
 ---
 
 ## What I Learned
 
-This challenge extends the basic Binary Search implementation from Chapter 1.
+The most useful lesson from this challenge is that Binary Search is not just a piece of code for finding exact values.
 
-Instead of only searching for an exact value, I adapted the algorithm to find the first value that satisfies:
+The deeper idea is:
+
+> Use sorted data to safely eliminate part of the search space after every comparison.
+
+In basic Binary Search, I might stop when:
+
+```text
+guess == target
+```
+
+Here, that is not always enough.
+
+I need to find the **boundary** where values first begin satisfying:
 
 ```text
 value >= target
 ```
 
-The important idea is that Binary Search is not just a fixed piece of code.
+That changes how I update `low` and `high`.
 
-The real skill is understanding how to use:
-
-```text
-low
-high
-mid
-```
-
-to safely eliminate part of an ordered search space.
-
-The `candidate` variable makes it possible to remember a valid answer while continuing the search for a better one.
+The `candidate` variable lets me remember a valid answer while continuing to search for an earlier and therefore better one.
 
 ---
 
 ## Key Takeaway
 
-The standard Binary Search question is:
+Basic Binary Search asks:
 
-> Is this exact target in the collection?
+> Where is this exact value?
 
-This challenge asks a more useful question:
+This challenge asks:
 
-> What is the first value that is equal to or greater than the target?
+> Where is the first value that is at least this large?
 
-Both can still be solved in:
+That small change turns a basic search exercise into a useful boundary-search pattern.
+
+And because the data is sorted, the solution still runs in:
 
 ```text
 O(log n)
 ```
-
-because the data is sorted and the search space can be reduced by approximately half after every comparison.
