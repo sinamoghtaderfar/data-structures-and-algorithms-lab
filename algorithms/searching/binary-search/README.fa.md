@@ -168,3 +168,13 @@ challenges/binary-search/
 ```
 
 در این challenge از Binary Search برای جستجو در داده‌های log استفاده شده است تا کاربرد الگوریتم فقط به پیدا کردن یک عدد در آرایه محدود نباشد.
+
+## Benchmark
+
+برای بررسی عملی تفاوت Binary Search و Linear Search، هر دو الگوریتم
+از نظر تعداد مقایسه‌ها و زمان واقعی اجرا Benchmark شدند.
+
+در این آزمایش از warm-up، اندازه‌گیری تکرارشونده، calibration خودکار
+و نمودارهای logarithmic استفاده شده است.
+
+[مشاهده توضیحات کامل Benchmark](./BENCHMARK.fa.md)

@@ -168,3 +168,13 @@ challenges/binary-search/
 ```
 
 The challenge applies Binary Search to a log-searching scenario instead of only searching simple numeric arrays.
+
+## Benchmark
+
+I compared Binary Search with Linear Search using both operation counts
+and measured runtime.
+
+The benchmark includes repeated measurements, warm-up, automatic
+calibration, and logarithmic visualizations.
+
+[View the full benchmark](./BENCHMARK.md)
