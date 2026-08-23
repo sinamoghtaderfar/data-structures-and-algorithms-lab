@@ -1,7 +1,5 @@
 [فارسی](./README.fa.md)
 
-# Chapter 2 — Selection Sort
-
 # Chapter 2 — Data Structures and Selection Sort
 
 Chapter 2 changed the way I think about storing a collection of values.
