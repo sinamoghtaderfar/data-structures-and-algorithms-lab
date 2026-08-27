@@ -1,5 +1,7 @@
 # Singly Linked List
 
+[فارسی](./README.fa.md)
+
 This folder contains my implementation of a singly linked list in Python.
 
 I built it while studying linked lists to understand how nodes are connected and how insertion, traversal, search, and deletion work without relying on Python's built-in list.
